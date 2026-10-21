@@ -1,0 +1,23 @@
+# LOGIN: sin header
+mutation { login(input:{email:"maria@empresa.test",password:"secreto"}) { token tokenType user { id name email } } }
+
+# Recursos protegidos (con Authorization: Bearer <token>)
+query { accounts { id name } concepts { id name } companyUsers { id name } }
+
+# María CAPTURISTA: permitido
+mutation { createTransaction(accountId:1,conceptId:1,type:"INGRESO",amount:250.00,description:"Evidencia Maria") { id type amount description } }
+
+# María/Pedro: rechazado
+mutation { createAccount(name:"NO_DEBE_GUARDARSE") { id name } }
+
+# Luis CONTADOR: permitido
+mutation { createAccount(name:"Cuenta creada por Luis") { id name } }
+
+# Ana ADMINISTRADOR cambia a Pedro; seed: Pedro=5, CAPTURISTA=3
+mutation { assignRole(input:{companyUserId:5,roleId:3}) { id name } }
+
+# Mismo token viejo de Pedro: ahora permitido
+mutation { createTransaction(accountId:1,conceptId:1,type:"INGRESO",amount:99.00,description:"Pedro con rol actualizado") { id description } }
+
+# Usuario externo: rechazo de recurso de la otra empresa
+query { account(id:1) { id name } }
